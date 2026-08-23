@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { eraOf, eraStyle } from '../game/eras.js'
 import { formatYear } from './format.js'
 
 /**
@@ -21,14 +22,17 @@ export default function Collection({ events, collected, onBack }) {
   }, [events, category])
 
   const ownedShown = shown.filter((e) => owned.has(e.id)).length
+  const pct = shown.length ? Math.round((ownedShown / shown.length) * 100) : 0
 
   return (
     <div className="screen screen--collection">
       <header className="collection__head">
-        <button className="btn btn--ghost btn--small" onClick={onBack}>← Menu</button>
+        <button className="icon-btn" onClick={onBack} aria-label="Back to menu">←</button>
         <h2>Collection</h2>
         <p className="collection__count">{ownedShown}/{shown.length}</p>
       </header>
+
+      <div className="collection__meter" aria-hidden="true"><span style={{ width: `${pct}%` }} /></div>
 
       <div className="chips" role="group" aria-label="Filter by category">
         {categories.map((c) => (
@@ -46,11 +50,19 @@ export default function Collection({ events, collected, onBack }) {
       <ul className="collection__list">
         {shown.map((event) => {
           const have = owned.has(event.id)
+          const era = eraOf(event.year)
           return (
-            <li key={event.id} className={`entry ${have ? '' : 'entry--locked'}`}>
+            <li
+              key={event.id}
+              className={`entry ${have ? '' : 'entry--locked'}`}
+              style={have ? eraStyle(event.year) : undefined}
+            >
               <span className="entry__emoji" aria-hidden="true">{have ? event.emoji : '🔒'}</span>
-              <div>
-                <p className="entry__year">{have ? formatYear(event.year) : '????'}</p>
+              <div className="entry__body">
+                <p className="entry__year">
+                  {have ? formatYear(event.year) : '????'}
+                  {have && <span className="entry__era">{era.label}</span>}
+                </p>
                 <h3 className="entry__title">{have ? event.title : 'Not found yet'}</h3>
                 {have && <p className="entry__blurb">{event.blurb}</p>}
               </div>

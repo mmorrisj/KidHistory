@@ -1,3 +1,4 @@
+import EventCard from './EventCard.jsx'
 import { formatYear } from './format.js'
 
 export default function GameOver({ run, isNewBest, onAgain, onMenu, onCollection }) {
@@ -5,7 +6,6 @@ export default function GameOver({ run, isNewBest, onAgain, onMenu, onCollection
   return (
     <div className="screen screen--over">
       <h2 className="over__title">{cleared ? 'You cleared the deck! 🏆' : 'Out of hearts'}</h2>
-
       {isNewBest && <p className="over__best">New best score! 🎉</p>}
 
       <dl className="stats stats--big">
@@ -20,6 +20,16 @@ export default function GameOver({ run, isNewBest, onAgain, onMenu, onCollection
           {formatYear(run.lastResult.card.year)}.
         </p>
       )}
+
+      {/* The timeline you built is the thing worth looking back at. */}
+      <section className="over__review">
+        <h3>Your timeline</h3>
+        <div className="over__strip">
+          {run.timeline.map((event) => (
+            <EventCard key={event.id} event={event} compact tone="placed" />
+          ))}
+        </div>
+      </section>
 
       <div className="menu menu--row">
         <button className="btn btn--primary" onClick={onAgain}>Play again</button>

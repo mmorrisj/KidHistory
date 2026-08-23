@@ -1,12 +1,14 @@
 import { useEffect, useRef } from 'react'
 import EventCard from './EventCard.jsx'
+import { eraOf } from '../game/eras.js'
 
 /**
  * The timeline reads left to right, oldest first, with a tappable gap between
- * every pair of cards. Tapping a gap is how you place the current card —
- * chosen over drag-and-drop because it works on touch and with a keyboard.
+ * every pair of cards. Two ways in: tap a gap, or drag the card onto one.
  */
-export default function Timeline({ timeline, onPlace, disabled, lastResult }) {
+export default function Timeline({
+  timeline, onPlace, disabled, lastResult, scrollerRef, hoveredSlot, dragging,
+}) {
   const landed = useRef(null)
 
   // Keep the card that was just placed in view; the strip gets wide fast.
@@ -19,7 +21,9 @@ export default function Timeline({ timeline, onPlace, disabled, lastResult }) {
   const slot = (index) => (
     <button
       key={`slot-${index}`}
-      className="slot"
+      type="button"
+      data-slot={index}
+      className={`slot ${hoveredSlot === index ? 'slot--hot' : ''} ${dragging ? 'slot--armed' : ''}`}
       onClick={() => onPlace(index)}
       disabled={disabled}
       aria-label={slotLabel(timeline, index)}
@@ -30,13 +34,15 @@ export default function Timeline({ timeline, onPlace, disabled, lastResult }) {
   )
 
   return (
-    <div className="timeline">
+    <div className="timeline" ref={scrollerRef}>
       <div className="timeline__track" role="list">
         <span className="timeline__rail" aria-hidden="true" />
         <span className="timeline__end" aria-hidden="true">◀ older</span>
         {slot(0)}
         {timeline.map((event, i) => {
           const justLanded = lastResult?.card.id === event.id
+          const era = eraOf(event.year)
+          const newEra = i === 0 || eraOf(timeline[i - 1].year).key !== era.key
           return [
             <div
               key={event.id}
@@ -46,7 +52,9 @@ export default function Timeline({ timeline, onPlace, disabled, lastResult }) {
                 'timeline__item' +
                 (justLanded ? (lastResult.correct ? ' is-correct' : ' is-wrong') : '')
               }
+              style={{ '--era-h': era.hue }}
             >
+              {newEra && <span className="timeline__era" style={{ '--era-h': era.hue }}>{era.label}</span>}
               <EventCard event={event} compact tone="placed" />
             </div>,
             slot(i + 1),

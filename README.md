@@ -32,11 +32,15 @@ Node's built-in test runner, no extra dependencies. Two suites:
 
 ```
 src/
-  game/engine.js      pure game rules — no React, no DOM, no storage
-  game/storage.js     localStorage progress, defensive about being blocked
-  content/events.json the content pack
-  components/         presentational React components
-  App.jsx             screen routing and run lifecycle
+  game/engine.js       pure game rules — no React, no DOM, no storage
+  game/storage.js      localStorage progress, defensive about being blocked
+  game/eras.js         maps a year to an era and its colour
+  game/sound.js        Web Audio chimes, synthesised rather than shipped
+  game/confetti.js     ~40-line canvas particle burst
+  hooks/useCardDrag.js pointer-event drag-to-place
+  content/events.json  the content pack
+  components/          presentational React components
+  App.jsx              screen routing and run lifecycle
 ```
 
 `engine.js` is deliberately free of framework code. Every function takes state and
@@ -45,9 +49,10 @@ state can be serialised later for multiplayer or replays.
 
 ## The design, and why
 
-**Tap-to-place, not drag-and-drop.** Dragging is fiddly on a phone and unusable
-from a keyboard. Tapping a `+` gap is one gesture, works everywhere, and each gap
-carries a screen-reader label saying which two events it sits between.
+**Two ways to place, not one.** Dragging feels good but is unusable from a
+keyboard, so tapping a `+` gap is the primary route and drag is an addition. The
+drag is built on pointer events, so one code path covers mouse, touch and pen.
+Every gap carries a screen-reader label saying which two events it sits between.
 
 **Difficulty scales itself.** An empty timeline has enormous gaps and an almost
 full one has tight ones, so the game gets harder as you get better without any
@@ -58,9 +63,25 @@ widely spaced) before tier 2 and tier 3.
 belongs, in context, next to the events either side of it. That is the moment the
 learning happens, so the game never just says "no".
 
+**Colour carries information.** Every card is tinted by its era, and each era also
+paints a faint full-height column behind the strip. A filled timeline is readable
+as bands at a glance, and era grouping gets taught without a lesson. This is why
+the play area is not a single accent colour.
+
+**Nothing is loaded from a CDN.** Fonts are bundled through Vite, sound is
+synthesised from oscillators, and the confetti is hand-written. The app is
+genuinely playable offline rather than nominally so.
+
 **The collection is the long game.** A single run is a few minutes. Filling in all
 69 cards is weeks, and the collection screen doubles as a map of what is still out
 there.
+
+## Sound
+
+Chimes are synthesised with the Web Audio API — a few oscillators with an
+exponential decay. Nothing to download and nothing to fail offline. The correct
+chime rises with your streak, so a hot run audibly climbs. Muting is a button in
+the HUD and persists.
 
 ## Adding events
 
@@ -90,4 +111,5 @@ middling, 3 for events that need a tight judgement call.
 - **Era packs** — Ancient Egypt, Space Race, Civil Rights — as separate decks.
 - **Two-player pass-and-play**, taking turns on one timeline.
 - **Connection mode**: given two events, explain how one led to the other.
-- Sound, and richer art per card.
+- Richer art per card, in place of emoji.
+- A visible era-progress map on the menu, showing which eras you have filled in.
