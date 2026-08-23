@@ -1,0 +1,13 @@
+{
+  "name": "KidHistory",
+  "short_name": "KidHistory",
+  "description": "Place history's biggest moments in the right order.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1d2b53",
+  "theme_color": "#1d2b53",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
