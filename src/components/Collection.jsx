@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { eraOf, eraStyle } from '../game/eras.js'
 import { formatYear } from './format.js'
+import WikiLink from './WikiLink.jsx'
 
 /**
  * The long-term hook: every card you place correctly is yours to keep and
@@ -65,6 +66,7 @@ export default function Collection({ events, collected, onBack }) {
                 </p>
                 <h3 className="entry__title">{have ? event.title : 'Not found yet'}</h3>
                 {have && <p className="entry__blurb">{event.blurb}</p>}
+                {have && <WikiLink event={event} />}
               </div>
             </li>
           )
