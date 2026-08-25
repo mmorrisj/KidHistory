@@ -33,6 +33,18 @@ Pages serves the app from `/KidHistory/` rather than a domain root, which is why
 `vite.config.js` sets `base: './'`. Every asset reference is relative, so the
 same build works at any path — keep it that way when adding assets.
 
+**Settings → Pages → Source must stay on "GitHub Actions."** On "Deploy from a
+branch" the branch build publishes the repository root, and the root
+`index.html` is Vite's *source* template — it references `/src/main.jsx`, which
+does not exist in a published site. It 404s, React never mounts, and visitors
+get a blank page. Worse, that build lands seconds *after* this workflow's
+deployment and overwrites it, so every job stays green while the site is blank.
+
+The deploy job guards against exactly that: after publishing it fetches the live
+URL, then holds for two minutes re-checking, and fails if the site ever stops
+serving the built bundle. A green deploy therefore means the site really is
+live, not merely that Pages accepted an artifact.
+
 ## Running the tests
 
 ```bash
