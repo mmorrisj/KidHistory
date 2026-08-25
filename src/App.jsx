@@ -12,6 +12,7 @@ import GameOver from './components/GameOver.jsx'
 import Timeline from './components/Timeline.jsx'
 import EventCard from './components/EventCard.jsx'
 import HUD from './components/HUD.jsx'
+import WikiLink from './components/WikiLink.jsx'
 import { formatYear } from './components/format.js'
 
 // How long the right/wrong banner stays up before the next card is dealt.
@@ -161,6 +162,7 @@ export default function App() {
                 <strong>{feedback.card.title}</strong> — {formatYear(feedback.card.year)}
               </p>
               <p className="banner__blurb">{feedback.card.blurb}</p>
+              <WikiLink event={feedback.card} />
             </div>
           ) : run.current ? (
             <>

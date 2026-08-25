@@ -125,7 +125,8 @@ the shape, uniqueness, year range, blurb length, and tier balance for you.
   "category": "space",
   "region": "Americas",
   "tier": 1,
-  "emoji": "🌙"
+  "emoji": "🌙",
+  "wiki": "Apollo 11"
 }
 ```
 
@@ -133,6 +134,13 @@ Use negative years for BCE: `-2560` renders as "2560 BCE".
 
 `tier` controls when a card enters the deck — 1 for famous anchors, 2 for
 middling, 3 for events that need a tight judgement call.
+
+`wiki` is a search phrase, not a URL or an article slug. Links are built in
+`src/game/wiki.js` and point at Wikipedia's `Special:Search/`, which jumps
+straight to the article when the phrase matches one and shows search results
+when it does not — so an imperfect phrase lands the reader on something useful
+instead of a dead "no article with this exact name" page. Write the phrase you
+would type into a search box.
 
 ## Ideas not built yet
 
