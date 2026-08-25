@@ -64,21 +64,47 @@ jobs:
         run: |
           url="${{ steps.deployment.outputs.page_url }}"
           echo "Checking $url"
+
+          serves_bundle() {
+            curl -sSL --max-time 20 "$url" 2>/dev/null | grep -q 'assets/index-'
+          }
+
+          # Phase 1: wait for this deployment to become visible.
+          live=false
           for i in $(seq 1 20); do
-            body=$(curl -sSL --max-time 20 "$url" || true)
-            if printf '%s' "$body" | grep -q 'assets/index-'; then
-              echo "OK: the built bundle is being served."
-              exit 0
-            fi
+            if serves_bundle; then live=true; break; fi
             echo "attempt $i: built assets not served yet"
             sleep 15
           done
-          echo "::error::$url is not serving the built bundle."
-          echo "Most likely cause: Settings -> Pages -> Source is still"
-          echo "'Deploy from a branch'. That publishes the repo root, whose"
-          echo "index.html is the Vite source shell referencing /src/main.jsx,"
-          echo "which 404s and renders a blank page. Set Source to"
-          echo "'GitHub Actions' so this workflow is the only publisher."
-          echo "--- what is actually being served ---"
-          printf '%s' "$body" | head -40
-          exit 1
+
+          if [ "$live" != true ]; then
+            echo "::error::$url never served the built bundle."
+            curl -sSL --max-time 20 "$url" 2>/dev/null | head -40
+            exit 1
+          fi
+
+          # Phase 2: hold. A single passing check proves only that the site was
+          # correct for one instant. A competing publisher (the Pages branch
+          # build) lands seconds later and overwrites this deployment, so
+          # exiting on first success reports a green deploy for a blank site.
+          echo "Built bundle is live. Holding 2 minutes to confirm it stays."
+          for i in $(seq 1 6); do
+            sleep 20
+            if serves_bundle; then
+              echo "hold $i/6: still serving the built bundle"
+            else
+              echo "::error::$url served the built bundle, then stopped."
+              echo "Something else is publishing over this deployment."
+              echo "Almost certainly Settings -> Pages -> Source is still"
+              echo "'Deploy from a branch'. That branch build republishes the"
+              echo "repo root, whose index.html is the Vite source shell"
+              echo "referencing /src/main.jsx -- which 404s and renders blank."
+              echo "Set Source to 'GitHub Actions' so this workflow is the"
+              echo "only publisher."
+              echo "--- what is actually being served now ---"
+              curl -sSL --max-time 20 "$url" 2>/dev/null | head -40
+              exit 1
+            fi
+          done
+
+          echo "Stable: the live site is serving the built app."
