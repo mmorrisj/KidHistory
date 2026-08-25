@@ -9,13 +9,29 @@ Columbus is a mental model. Knowing that it was 1440 is a flashcard.
 
 ## Playing
 
+Live at **https://mmorrisj.github.io/KidHistory/** — it installs as a phone app
+from the browser's "Add to Home Screen".
+
+To run it locally:
+
 ```bash
 npm install
 npm run dev
 ```
 
 Then open the URL Vite prints. `npm run build` produces a static `dist/` you can
-host anywhere; it installs as a phone app from the browser's "Add to Home Screen".
+host anywhere.
+
+## Deployment
+
+Pushing to `main` runs `.github/workflows/deploy.yml`, which tests, builds, and
+publishes `dist/` to GitHub Pages. The tests gate the deploy, so a red suite
+never reaches the live site. `.github/workflows/ci.yml` runs the same checks on
+pull requests.
+
+Pages serves the app from `/KidHistory/` rather than a domain root, which is why
+`vite.config.js` sets `base: './'`. Every asset reference is relative, so the
+same build works at any path — keep it that way when adding assets.
 
 ## Running the tests
 
